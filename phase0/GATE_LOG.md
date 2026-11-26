@@ -134,4 +134,14 @@ Note on Kaggle auth: the CLI (2.2.5) requires a `KGAT_` access token in
 `~/.kaggle/access_token`, not in `kaggle.json` — a legacy `kaggle.json` produced the
 "Authentication required" error. The bulk dataset download for
 `manwithacat/vqcc-apache-public-circuits` 404s, but per-file downloads work;
-`/tmp/fetch_public.py` enumerates and fetches all family directories.
+`scripts/fetch_public_files.py` enumerates and fetches all family directories (filtering
+out the dataset's thousands of unrelated `regions/*.json` files).
+
+### Live baseline submission
+
+Submitted the official sample submission as a complete zip to Kaggle:
+`submission.zip` containing `invsqrt.kmb`, `dqi.kmb`, `dfthcsos/angle_k_0..9.kmb`,
+`dfthcsos/submission.npz`. Submission ref **58940072**, status PENDING at submit time.
+The first attempt 400'd because this competition requires the upload filename to be
+exactly `submission.zip`; the resubmission with that name succeeded. 4 submissions
+remain today. Scoring latency is ~45 min, so the live score is not yet available.
