@@ -198,4 +198,6 @@ Submitted the official sample submission as a complete zip to Kaggle:
 `dfthcsos/submission.npz`. Submission ref **58940072**, status PENDING at submit time.
 The first attempt 400'd because this competition requires the upload filename to be
 exactly `submission.zip`; the resubmission with that name succeeded. 4 submissions
-remain today. Scoring latency is ~45 min, so the live score is not yet available.
+remain today. Scoring has since completed: **publicScore = 1.00000**, exactly the
+expected geometric-mean reference (all three tasks at baseline cost). This confirms
+the end-to-end Kaggle pipeline and the leaderboard normalization `10 × GM`.
