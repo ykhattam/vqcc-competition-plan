@@ -1,5 +1,7 @@
 # Final Plan — VQCC Competition (Executable Version)
 
+> **Execution status:** Phase 0 Gates 0a/0b resolved. See [phase0/GATE_LOG.md](phase0/GATE_LOG.md) for findings. The text below has been amended to match the actual verifier.
+
 ## Strategic Position
 
 **Binary choice (resolve NOW):**
@@ -23,12 +25,12 @@ The competition provides a metric implementation link. **If readable:** use it d
 
 **Kill rule:** If Gate 0a takes >2 days or the implementation is partial, trigger Phase 2 compression (cut to 15 days).
 
+**Status (Day 1):** implementation readable via public verifier mirror + companion paper; official cross-check pending. The implemented hard gates are `Λ > 49.0` and `E_gap > 3.914898 Ha` (the inequalities in the original draft were reversed).
+
 ### Gate 0b (Day 1–2): Resolve salt semantics
-The description says "salted cryptographic hash of your submission" + "any change gets fresh random draws." This strongly implies the salt is **content-derived from your submission**, not a separate private salt that changes between Jan 4 and Jan 20.
+**Resolved:** the verifier seeds its sampler with the submission's SHA-256 digest **combined with a private, unpredictable salt** that the grader keeps secret until submissions are fixed (paper §II and `SCORING_README.md`). Repeating verification with the same submission and salt repeats the same samples and adds no independent evidence.
 
-**If confirmed:** "Salt variance" means sensitivity to submission perturbation, not private-salt risk. The Jan 4 / Jan 20 salt-freeze question dissolves.
-
-**If not confirmed:** Proceed with robustness design (assume salt changes).
+**Consequence:** proceed with robustness design. Treat every public score as one draw under an unknown salt. Do not assume the salt is content-derived only, and do not assume it is frozen across Jan 4 / Jan 20 until confirmed in writing.
 
 **Deliverable:** Written confirmation of salt semantics from rules/forum/notebook discussions.
 
@@ -42,7 +44,7 @@ Take best public factorization families + best public loaders + best continuous 
 ### Gate 0d (Day 3): Oracle validation bundle (only if Gate 0a failed)
 Validate the oracle on **20–30 stratified candidates per family shape**. Metrics:
 - Global Spearman/Kendall by family shape
-- **Cliff-adjacent rank correlation** (candidates within 5% of `20 mHa`, `Λ ≤ 49.0`, `E_gap ≤ 3.914898 Ha`)
+- **Cliff-adjacent rank correlation** (candidates within 5% of `20 mHa`, `Λ ≥ 49.0`, `E_gap ≥ 3.914898 Ha`)
 - Top-k regret
 - Calibration slope/offset
 - Hard-gate precision/recall
@@ -107,7 +109,7 @@ Measure compile time, salt-verify time, memory peak, and cache hit rate on 10 ca
 
 4. **Salt check:** Run on the submission-hash salt (per Gate 0b). For final candidates, escalate to **adaptive salt perturbation** (50–100 perturbed submissions) and adversarial margin testing.
 
-5. **Accept/reject:** Accept only if cost beats bank best by more than the empirical 95th-percentile bound of salt-perturbation cost, **and** gate margins are ≥5% from each cliff (`error ≤ 19.0 mHa`, `Λ ≤ 48.0`, `E_gap ≤ 3.90 Ha`).
+5. **Accept/reject:** Accept only if cost beats bank best by more than the empirical 95th-percentile bound of salt-perturbation cost, **and** gate margins clear each cliff by a fixed safety buffer (`error ≤ 19.0 mHa`, `Λ ≥ 50.0`, `E_gap ≥ 3.95 Ha`). A literal 5% E_gap margin (≥4.11 Ha) would reject the baseline at 3.965 Ha, so use the absolute buffer above.
 
 6. **Demotion trigger:** If cliff-adjacent surrogate correlation < 0.7 for 3 consecutive days, or hard-gate precision < 0.90 on any family, **demote JAX to bit-width/angle allocation only** and run discrete search (CP-SAT, evolutionary, LNS) for loader structure.
 
@@ -121,9 +123,9 @@ Measure compile time, salt-verify time, memory peak, and cache hit rate on 10 ca
 
 **Non-kickmix pricing (analytic):** The chemistry score includes Givens rotations, state prep, and QROM pricing that are **not** kickmix-verified. The oracle must replicate the analytic pricing, not just `kickmix` verification.
 
-**Constraint independence (test first):** `error_1` and `error_2` both sit near 19.99998 mHa in public refits. Test whether the organizer treats them independently or jointly before setting gate margins. If additive, the effective constraint is 10 mHa each, not 20 mHa total.
+**Constraint independence (confirmed structurally):** `error_1` and `error_2` are two separate Frobenius residuals, each with its own 0.020 Ha gate, recomputed from the **quantized** words recovered from the circuits. No shared 20 mHa budget appears in the verifier; keep separate margins for each.
 
-**E_gap physical meaning (verify):** Passing `E_gap ≤ 3.914898 Ha` may not mean valid chemistry. If `E_gap` is the ground-to-first-excited gap, driving it to the threshold may produce a physically invalid but numerically valid factorization. Verify against reference chemistry data where possible.
+**E_gap physical meaning (confirmed):** the spec explicitly states the acceptance thresholds "do not certify a 20 mHa many-electron energy error." Passing `E_gap > 3.914898 Ha` is a numerical gate, not proof of valid chemistry. The score `sqrt(E_gap*(2Λ−E_gap)) * T_tot * Q_tot` can fall as E_gap rises toward 2Λ, so chemistry validity must be checked separately against reference data.
 
 **Task I/II fallback verification:** Verify Task I/II circuits under the same salt/verification semantics as Task III before relying on them for the overall GM fallback.
 
@@ -169,7 +171,7 @@ Entry and team-merger deadlines are Jan 13. If solo, no action. If recruiting or
 | Gate | When | Kill/Continue |
 |------|------|---------------|
 | G0a: Metric implementation readable | Day 2 | If no → proceed to Gate 0d, compress Phase 2 to 15 days |
-| G0b: Salt semantics confirmed | Day 2 | If salt is content-derived → rewrite salt strategy; if not → proceed with robustness design |
+| G0b: Salt semantics confirmed | Day 2 | **Done:** salt is private → robustness design (multi-salt perturbation testing) |
 | G0c: Pareto-status ROI check | Day 3 | If loader-only has higher ROI → pivot to loader-only, skip co-design |
 | G0d: Oracle validation bundle | Day 3 | If cliff-adjacent ρ < 0.8 or hard-gate precision < 0.95 → stop, cannot optimize reliably |
 | G0e: Throughput profile | Day 3 | If full loop does not fit 4 cores / 16 GiB → reduce candidates/salts or use cloud |
@@ -186,7 +188,7 @@ Entry and team-merger deadlines are Jan 13. If solo, no action. If recruiting or
 - **Do not run e-graphs + CP-SAT + stochastic search concurrently on 4 cores.** Stage-gate: one heavy solver at a time.
 - **Do not leak best Task III work on Jan 4.** Keep private for Single-Task Prize.
 - **Do not trust a single salt.** Every accepted family must pass multi-salt verification with gate margins.
-- **Do not assume the private salt is frozen** across Jan 4 / Jan 20 unless confirmed in writing (Gate 0b).
+- **Do not assume the private salt is frozen or content-derived only** across Jan 4 / Jan 20 unless confirmed in writing (Gate 0b: confirmed private).
 - **Do not use a fixed 3% Pareto gap.** Use ROI rule (Gate 0c).
 - **Do not set dollar budget before throughput profile.** Pre-authorize $500 ceiling, then set explicit ceiling after Gate 0e.
 - **Do not continue auditing.** Execute Gate 0a now.
@@ -195,4 +197,4 @@ Entry and team-merger deadlines are Jan 13. If solo, no action. If recruiting or
 
 ## One-Line Summary
 
-**Read the metric implementation on Day 1 (Gate 0a), resolve salt semantics and Longest Leader conflict as binary choices now, co-design factorization and QROM loaders in a closed JAX + `kickmix` loop under hard gate margins with explicit demotion triggers, keep the best Task III family private until Jan 20, and treat every public score as a single salt draw rather than a stable target.**
+**Read the metric implementation on Day 1 (Gate 0a), resolve salt semantics and Longest Leader conflict as binary choices now, co-design factorization and QROM loaders in a closed JAX + `kickmix` loop under hard gate margins with explicit demotion triggers, keep the best Task III family private until Jan 20, and treat every public score as a single draw from a private, unknown salt rather than a stable target.**
