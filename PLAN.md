@@ -76,7 +76,7 @@ Measure compile time, salt-verify time, memory peak, and cache hit rate on 10 ca
 │  JAX/PyTorch continuous step                         │
 │  → U, W, H2_I, H1_I, Hsym_lower                     │
 │  → angle/bit-width allocation (smooth)              │
-│  → augmented Lagrangian on: error ≤ 20 mHa, Λ ≤ 49  │
+│  → augmented Lagrangian on: error ≤ 20 mHa, Λ > 49  │
 │  → objective: minimize λ_eff × expected loader cost │
 └──────────────────────┬──────────────────────────────┘
                        │ quantized angles
@@ -90,7 +90,7 @@ Measure compile time, salt-verify time, memory peak, and cache hit rate on 10 ca
                        ▼
 ┌─────────────────────────────────────────────────────┐
 │  Salt/verification check                             │
-│  → run on submission-hash salt (per Gate 0b)        │
+│  → run on submission-hash + private salt draws     │
 │  → for final candidates: adaptive escalation        │
 │    (50–100 perturbed submissions)                   │
 └──────────────────────┬──────────────────────────────┘
@@ -107,7 +107,7 @@ Measure compile time, salt-verify time, memory peak, and cache hit rate on 10 ca
 
 3. **Post-quantization stability check:** Recompute `error_1`, `error_2`, `E_gap` from the **quantized** angles (not continuous ones) before accepting.
 
-4. **Salt check:** Run on the submission-hash salt (per Gate 0b). For final candidates, escalate to **adaptive salt perturbation** (50–100 perturbed submissions) and adversarial margin testing.
+4. **Salt check:** Run across sampled private-salt draws (per Gate 0b), since the real salt is unknown. For final candidates, escalate to **adaptive salt perturbation** (50–100 perturbed submissions) and adversarial margin testing.
 
 5. **Accept/reject:** Accept only if cost beats bank best by more than the empirical 95th-percentile bound of salt-perturbation cost, **and** gate margins clear each cliff by a fixed safety buffer (`error ≤ 19.0 mHa`, `Λ ≥ 50.0`, `E_gap ≥ 3.95 Ha`). A literal 5% E_gap margin (≥4.11 Ha) would reject the baseline at 3.965 Ha, so use the absolute buffer above.
 
