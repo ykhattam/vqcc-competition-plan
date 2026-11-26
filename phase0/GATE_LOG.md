@@ -45,6 +45,26 @@ Baseline regression target (empty salt, from a public verifier run):
 `score = 3355599588.3155375`, `lambda_eff = 49.30136925057439`,
 `T_total = 93237`, `Q_total = 730`, `submission_sha256 = 276d464f…2695`.
 
+### Oracle status: RUNNING LOCALLY — exact baseline match
+
+Official data pulled from Kaggle to `~/vqcc` (competition archive; SHA-256 of
+`FeMoCo76o113e.fcidump` = `e5a48af7…de695e1bd` and of
+`FeMoCo76o113e.fixed_shifts.npz` = `7b7facf6…851cd87`, both matching the spec).
+`kickmix.so` is built for Python 3.13; a `uv` venv with Python 3.13.18 + numpy 2.5.5 +
+scipy 1.18.1 at `~/vqcc/.venv` loads it successfully.
+
+Local run of `verifiers/dfthcsos/verify.py` on `sample_submission/dfthcsos`:
+
+```
+status  = PASS
+score   = 3355599588.3155365   (reference 3355599588.3155375, ratio 1.0)
+lambda_eff = 49.30136925057438
+toffoli_count = 93237, num_qubits = 730
+submission_sha256 = 276d464f…2695
+```
+
+Gate 0a deliverable met; Gate 0d stays skipped per the plan.
+
 ### Fidelity details that matter for the oracle
 
 * FCIDUMP two-electron integrals are cast to **float32** before use; `S` is rounded to
@@ -104,13 +124,14 @@ Needs the public factorization families / loaders / refits from the Kaggle datas
 
 Gate 0a succeeded (metric implementation readable), so per the plan Gate 0d is skipped.
 
-## Gate 0e — Throughput profile: **PENDING**
+## Gate 0e — Throughput profile: **IN PROGRESS**
 
-Needs `kickmix.so`, the sample submission, and 10 candidates. Environment currently:
-Kaggle CLI repaired (`six` installed, CLI 2.2.5) but `~/.kaggle/kaggle.json` is absent.
+`kickmix.so` and the sample submission are local and working; a single baseline
+verification takes ~25 s including FCIDUMP parsing. `phase0/audit_public.py` caches
+FCIDUMP loading and circuit parsing across salt draws to make multi-salt audits cheap.
 
-## Blocking item
-
-Kaggle API token required at `~/.kaggle/kaggle.json` (chmod 600) for
-`kaggle competitions download -c google-verifiable-quantum-circuit-compilation`.
-Rules must be accepted in a browser first. Until then the oracle cannot be executed.
+Note on Kaggle auth: the CLI (2.2.5) requires a `KGAT_` access token in
+`~/.kaggle/access_token`, not in `kaggle.json` — a legacy `kaggle.json` produced the
+"Authentication required" error. The bulk dataset download for
+`manwithacat/vqcc-apache-public-circuits` 404s, but per-file downloads work;
+`/tmp/fetch_public.py` enumerates and fetches all family directories.
