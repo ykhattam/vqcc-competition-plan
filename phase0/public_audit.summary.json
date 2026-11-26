@@ -1,0 +1,72 @@
+{
+  "02f8f7d9d75a": {
+    "passes": 10,
+    "draws": 10,
+    "best_score": 331025488.42506784,
+    "worst_score": 331025488.42506784,
+    "score_spread_pct": 0.0
+  },
+  "004d3c3d0ae4": {
+    "passes": 10,
+    "draws": 10,
+    "best_score": 331076721.7501548,
+    "worst_score": 331076721.7501548,
+    "score_spread_pct": 0.0
+  },
+  "01dc4332d92d": {
+    "passes": 10,
+    "draws": 10,
+    "best_score": 294827530.2995456,
+    "worst_score": 294827530.2995456,
+    "score_spread_pct": 0.0
+  },
+  "032f53b71f97": {
+    "passes": 10,
+    "draws": 10,
+    "best_score": 296005816.28649473,
+    "worst_score": 296005816.28649473,
+    "score_spread_pct": 0.0
+  },
+  "0418007f2646": {
+    "passes": 10,
+    "draws": 10,
+    "best_score": 340990159.68148416,
+    "worst_score": 340990159.68148416,
+    "score_spread_pct": 0.0
+  },
+  "024d6448b9c2": {
+    "passes": 10,
+    "draws": 10,
+    "best_score": 299672192.42007244,
+    "worst_score": 299672192.42007244,
+    "score_spread_pct": 0.0
+  },
+  "02640a627d0d": {
+    "passes": 10,
+    "draws": 10,
+    "best_score": 294762512.8596263,
+    "worst_score": 294762512.8596263,
+    "score_spread_pct": 0.0
+  },
+  "04011855be3d": {
+    "passes": 10,
+    "draws": 10,
+    "best_score": 344812530.9004197,
+    "worst_score": 344812530.9004197,
+    "score_spread_pct": 0.0
+  },
+  "043642216848": {
+    "passes": 10,
+    "draws": 10,
+    "best_score": 255384410.16266406,
+    "worst_score": 255384410.16266406,
+    "score_spread_pct": 0.0
+  },
+  "021550d932c0": {
+    "passes": 10,
+    "draws": 10,
+    "best_score": 294642299.7630277,
+    "worst_score": 294642299.7630277,
+    "score_spread_pct": 0.0
+  }
+}

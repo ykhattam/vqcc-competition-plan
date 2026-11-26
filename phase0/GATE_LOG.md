@@ -115,20 +115,74 @@ once Kaggle access is available.
 5. **Leaderboard scale:** baseline score `3.356e9`; the "33.2" notebook title and "~29.9"
    live top are consistent with `score / 1e8`. Optimize against raw score, not the title.
 
-## Gate 0c — Pareto/ROI check: **PENDING**
+## Gate 0c — Pareto/ROI check: **DONE**
 
-Needs the public factorization families / loaders / refits from the Kaggle dataset
-(`manwithacat/vqcc-apache-public-circuits`) and leaderboard data.
+`phase0/audit_public.py`: 10 complete public `dfthcsos` families × 10 independent
+random salt draws = 100 verifications, **all PASS**, score spread **0.0000%** for every
+family. Best salt-surviving public cost:
+
+```
+C_public_verified = 255,384,410.16   (family 043642216848)
+```
+
+Runner-ups: 294.6M, 294.8M, 296.0M, 299.7M, 331.0M, 331.1M, 341.0M, 344.8M.
+Official baseline is 3,355,599,588 → the best public family is ~13.1× cheaper.
+
+Component breakdown (the score is `λ_eff × T × Q`):
+
+| Family | R,B,C | J | brot | λ_eff | T | Q | score | ANGLES qubits | E_gap |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 043642216848 | 9,127,46 | 5 | 7 | 46.93 | 13,436 | 405 | 255.4M | 128 | 3.9149001 |
+| 021550d932c0 | 8,143,44 | 5 | 8 | 46.92 | 14,706 | 427 | 294.6M | 128 | 3.9148980 |
+| 04011855be3d | 8,143,60 | 5 | 8 | 48.52 | 16,528 | 430 | 344.8M | 128 | 3.9149022 |
+
+Across all 10 families: λ_eff spans only 46.89–48.63 (+3.7%), T spans
+13,436–16,528 (+23%), Q spans 405–430 (+6%). Correlation of `log(score)` with
+`log(T)` = **0.987**, with `log(Q)` = 0.797, with `log(λ_eff)` = 0.657. Variance
+share in log space: T ≈ 57%, λ ≈ 3%, Q ≈ 3% (remainder cross-terms).
+
+**Joint check:** taking the minimum of each component across all families gives
+`46.894 × 13,436 × 405 = 255.17M`, only 0.08% below the best actual family —
+there is no free Pareto combination left in the public set.
+
+**Headroom:** λ_eff is pinned near 47 because every family sits at the E_gap floor
+(3.914898) with Λ ≈ 283. The verifier's floor pair (Λ=49, E_gap=3.914898) gives
+λ_eff = 19.192, i.e. a theoretical 2.44× further score reduction. Loading all public
+families have `error_1`/`error_2` at ~0.01999 Ha (just under the 20 mHa gate), so
+lowering Λ while keeping both residuals under 20 mHa is the hard part. Loader
+compression (brot 8→7, J=5) has already delivered the observed 23% T spread.
+
+**ROI decision:** loader structure is the dominant driver of *observed* public
+variance and is cheap to search; factorization has the larger theoretical ceiling
+but its payoff is conditional on beating two cliff-adjacent residuals. Per the plan's
+ROI rule (not a fixed gap), continue the co-design loop for now but give loader
+structure priority in the first co-design sprint; revisit the pivot decision at G1.
+
+The official leaderboard is `10 × (∏ cost_ref/cost_b)^(1/3)` over the three tasks
+(Evaluation page), higher is better; Task III cost is the raw `λ_eff·T·Q`. The metric
+notebook linked from Evaluation (`google-quantum-ai-metric`) is not readable with this
+account (403), but the packaged `verifiers/` source is authoritative for Task III.
 
 ## Gate 0d — Oracle validation bundle: **SKIPPED**
 
 Gate 0a succeeded (metric implementation readable), so per the plan Gate 0d is skipped.
 
-## Gate 0e — Throughput profile: **IN PROGRESS**
+## Gate 0e — Throughput profile: **DONE**
 
-`kickmix.so` and the sample submission are local and working; a single baseline
-verification takes ~25 s including FCIDUMP parsing. `phase0/audit_public.py` caches
-FCIDUMP loading and circuit parsing across salt draws to make multi-salt audits cheap.
+Measured over 100 verifications (10 families × 10 salts):
+
+| Quantity | Value |
+| --- | --- |
+| Cold verification (FCIDUMP parse included) | 19.0 s |
+| Cached verification (same family, new salt) | 6.82 s mean / 5.91 s median |
+| Peak RSS (`/usr/bin/time -v`) | 1.13 GiB |
+| 100 salt draws | 11.6 min wall, single core |
+
+Fits comfortably in 4 cores / 16 GiB — no cloud fallback needed at this stage.
+Budget for Phase 1: ~10 salts per candidate = ~68 s/candidate → ~1,200 candidates
+per core-day; 50–100 adversarial perturbations per finalist = 6–11 min/finalist
+→ ~130–250 finalists per core-day. With 4 cores the $500 ceiling is unlikely to bind
+unless the continuous optimizer itself becomes heavy.
 
 Note on Kaggle auth: the CLI (2.2.5) requires a `KGAT_` access token in
 `~/.kaggle/access_token`, not in `kaggle.json` — a legacy `kaggle.json` produced the

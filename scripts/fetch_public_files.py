@@ -42,7 +42,7 @@ for i, name in enumerate(names, 1):
         try:
             subprocess.run(
                 ["kaggle", "datasets", "download", "-d", DATASET, "-f", name,
-                 "-p", os.path.dirname(target), "-o", "-q"],
+                 "-p", DEST, "-o", "-q"],
                 check=True,
             )
             break

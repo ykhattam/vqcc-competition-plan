@@ -50,7 +50,10 @@ def cached_load_circuits(circuits, *a, **kw):
 vmod.load_inputs = cached_load_inputs
 vmod.load_circuits = cached_load_circuits
 
-families = sorted(p for p in Path(args.families).iterdir() if p.is_dir())
+families = sorted(
+    p for p in Path(args.families).iterdir()
+    if p.is_dir() and (p / "submission.npz").is_file() and (p / "angle_k_0.kmb").is_file()
+)
 if args.limit:
     families = families[: args.limit]
 
